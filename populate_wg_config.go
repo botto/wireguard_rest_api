@@ -20,10 +20,17 @@ func (p *Peer) formatPeer() []byte {
 		"AllowedIPs = " + p.IPAddr + "\n")
 }
 
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
 func main() {
 
 	// WG_SERVER_CONFIG should contain server config
-	serverConfig := []byte(os.Getenv("WG_SERVER_CONFIG"))
+	serverConfig, err := ioutil.ReadFile(os.Getenv("WG_SERVER_CONFIG"))
+	check(err)
 
 	peerList := []Peer{}
 

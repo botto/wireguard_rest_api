@@ -6,16 +6,14 @@ GoLang API that helps you manage WireGuard access on nodes. This project is real
 
 In order to get `populate_wg_config.go` to work, you will need the following environment variables:
 
-* `WG_SERVER_CONFIG`: to contain server configuration. Assign the variable info in bash like this:
+* `WG_SERVER_CONFIG`: path to the file that contains server configuration. You should be able to cat the config like this:
 
 ```
-$ WG_SERVER_CONFIG="
+$ cat "$WG_SERVER_CONFIG"
 [Interface]
 Address = 10.10.10.100/24
 ListenPort = 31337
 PrivateKey = EKmMopd+xmskI9dXNtCHqS4TM0GQRmMkYh4Gs6Svm2k=
-"
-$ export WG_SERVER_CONFIG
 ```
 
 * `WG_CONFIG_NAME`: the name of the configuration file (the config will get written to `/etc/wireguard/${WG_CONFIG_NAME}.conf`)
