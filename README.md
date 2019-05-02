@@ -18,7 +18,7 @@ PrivateKey = EKmMopd+xmskI9dXNtCHqS4TM0GQRmMkYh4Gs6Svm2k=
 $ export WG_SERVER_CONFIG
 ```
 
-* `$WG_CONFIG_NAME`: the name of the configuration file (the config will get written to `/etc/wireguard/${WG_CONFIG_NAME}.conf`)
+* `WG_CONFIG_NAME`: the name of the configuration file (the config will get written to `/etc/wireguard/${WG_CONFIG_NAME}.conf`)
 
 * `WG_RESTART_SCRIPT`: the path to the `wg-quick` script you want to use to restart wireguard. If running wireguard in a specific network namespace, the script should look like this:
 ```
