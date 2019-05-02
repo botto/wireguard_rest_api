@@ -28,7 +28,7 @@ func check(e error) {
 
 func main() {
 
-	// WG_SERVER_CONFIG should contain server config
+	// WG_SERVER_CONFIG must contain path to file holding server config
 	serverConfig, err := ioutil.ReadFile(os.Getenv("WG_SERVER_CONFIG"))
 	check(err)
 
