@@ -61,14 +61,14 @@ func main() {
 		// if yes, return message to user
 		peerExists := false
 		for _, p := range peerList {
-			if p.IPAddr == ipAddr+"/24" || p.PubKey == pubKey {
+			if p.IPAddr == ipAddr+"/32" || p.PubKey == pubKey {
 				peerExists = true
 				fmt.Fprintln(w, "ERROR! Peer already registered: ", p)
 			}
 		}
 
 		if !peerExists && regexMatch {
-			peerList = append(peerList, Peer{IPAddr: ipAddr + "/24", PubKey: pubKey})
+			peerList = append(peerList, Peer{IPAddr: ipAddr + "/32", PubKey: pubKey})
 
 			// hardcoded wireguard server config
 			wireguardConfing := serverConfig
@@ -84,7 +84,7 @@ func main() {
 			// restart wireguard interface
 			// the WG_RESTART_SCRIPT env var should contain the path to the script
 			//    that restart the wg interface (wg down / wg up)
-			out, err := exec.Command(os.Getenv("WG_RESTART_SCRIPT")).Output()
+			out, err := exec.Command("/bin/bash", os.Getenv("WG_RESTART_SCRIPT")).Output()
 			if err != nil {
 				fmt.Println("Error: ", err)
 			}
