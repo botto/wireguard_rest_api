@@ -79,7 +79,7 @@ func main() {
 			}
 
 			// write new config to file
-			_ = ioutil.WriteFile(os.Getenv("WG_CONFIG_NAME"), wireguardConfing, 0644)
+			_ = ioutil.WriteFile("/etc/wireguard/"+os.Getenv("WG_CONFIG_NAME")+".conf", wireguardConfing, 0644)
 
 			// restart wireguard interface
 			// the WG_RESTART_SCRIPT env var should contain the path to the script
