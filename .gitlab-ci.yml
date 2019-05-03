@@ -1,0 +1,13 @@
+stage:
+  - build
+/usr/share/nginx/html/wireguard_go_api
+
+build_image:
+  stage: build
+  scripts:
+    - 'go build populate_wg_config.go' 
+    - 'env'
+    - 'cp populate_wg_config /usr/share/nginx/html/wireguard_go_api/'
+  tag:
+    - build
+
