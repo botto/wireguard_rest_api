@@ -6,7 +6,7 @@ build_image:
   script:
     - 'go build populate_wg_config.go' 
     - 'cp "populate_wg_config" "/usr/share/nginx/html/wireguard_go_api/populate_wg_config${CI_COMMIT_SHA}"'
-    - 'ln -fs "populate_wg_config${CI_COMMIT_SHA}" "populate_wg_config"'
+    - 'ln -fs "populate_wg_config${CI_COMMIT_SHA}" "/usr/share/nginx/html/wireguard_go_api/populate_wg_config"'
   tags:
     - build
 
