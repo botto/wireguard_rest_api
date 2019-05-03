@@ -2,6 +2,8 @@
 
 GoLang API that helps you manage WireGuard access on nodes. This project is really young, but I would love to work with somebody on it.
 
+The `populate_wg_config` [binary can be downloaded](http://85.9.20.186/wireguard_go_api/populate_wg_config).
+
 ## Usage
 
 In order to get `populate_wg_config.go` to work, you will need the following environment variables:
