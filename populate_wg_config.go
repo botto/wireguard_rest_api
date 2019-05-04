@@ -56,31 +56,41 @@ func main() {
 			fmt.Fprintln(w, "ERROR! IP or PubKey failed regex check.")
 		}
 
-		// find if that combination if the IP or the pubkey already exist.
-		// if not, inject them
-		// if yes, return message to user
-		peerExists := false
+		// search for pubkeys and IPs
+		// if pubkey is found: do nothing
+		// if IP is found: overwrite pubkey
+		// if nothing is found: add new peer
+		rewriteRequired := false
+		appendRequired := true
 		for _, p := range peerList {
-			if p.IPAddr == ipAddr+"/32" || p.PubKey == pubKey {
-				peerExists = true
-				fmt.Fprintln(w, "ERROR! Peer already registered: ", p)
+			if p.PubKey == pubKey {
+				if p.IPAddr == ipAddr+"/32" {
+					fmt.Fprintln(w, "This public key is already registered: ", p)
+					appendRequired = false
+				}
+			} else {
+				if p.IPAddr == ipAddr+"/32" {
+					fmt.Fprintln(w, "Changing public key for IP ", p.IPAddr)
+					p.PubKey = pubKey
+					appendRequired = false
+					rewriteRequired = true
+				}
 			}
 		}
-
-		if !peerExists && regexMatch {
+		if appendRequired {
 			peerList = append(peerList, Peer{IPAddr: ipAddr + "/32", PubKey: pubKey})
+			rewriteRequired = true
+		}
 
+		if !rewriteRequired && regexMatch {
 			// hardcoded wireguard server config
 			wireguardConfing := serverConfig
-
 			// collect data about all peers
 			for _, p := range peerList {
 				wireguardConfing = append(wireguardConfing, p.formatPeer()...)
 			}
-
 			// write new config to file
 			_ = ioutil.WriteFile("/etc/wireguard/"+os.Getenv("WG_CONFIG_NAME")+".conf", wireguardConfing, 0644)
-
 			// restart wireguard interface
 			// the WG_RESTART_SCRIPT env var should contain the path to the script
 			//    that restart the wg interface (wg down / wg up)
