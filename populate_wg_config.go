@@ -49,7 +49,7 @@ func main() {
 		// check via regexp if the ip and pubkey are ok
 		regexMatch := false
 		matchedIP, _ := regexp.MatchString("^([0-9]{1,3}\\.){3,3}[0-9]{1,3}$", ipAddr)
-		matchedPubKey, _ := regexp.MatchString("^[0-9a-zA-Z\\/=]{43,43}=$", pubKey)
+		matchedPubKey, _ := regexp.MatchString("^[0-9a-zA-Z\\/=+]{43,43}=$", pubKey)
 		if matchedIP && matchedPubKey {
 			regexMatch = true
 		} else {
