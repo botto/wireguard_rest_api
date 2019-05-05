@@ -52,56 +52,58 @@ func main() {
 		matchedPubKey, _ := regexp.MatchString("^[0-9a-zA-Z\\/=+]{43,43}=$", pubKey)
 		if matchedIP && matchedPubKey {
 			regexMatch = true
+		}
+
+		if regexMatch {
+			// search for pubkeys and IPs
+			// if pubkey is found: do nothing
+			// if IP is found: overwrite pubkey
+			// if nothing is found: add new peer
+			rewriteRequired := false
+			appendRequired := true
+			for _, p := range peerList {
+				if p.PubKey == pubKey {
+					if p.IPAddr == ipAddr+"/32" {
+						fmt.Fprintln(w, "This public key is already registered: ", p)
+						appendRequired = false
+					}
+				} else {
+					if p.IPAddr == ipAddr+"/32" {
+						fmt.Fprintln(w, "Changing public key for IP ", p.IPAddr)
+						p.PubKey = pubKey
+						appendRequired = false
+						rewriteRequired = true
+					}
+				}
+			}
+			if appendRequired {
+				peerList = append(peerList, Peer{IPAddr: ipAddr + "/32", PubKey: pubKey})
+				rewriteRequired = true
+			}
+
+			if rewriteRequired {
+				// hardcoded wireguard server config
+				wireguardConfing := serverConfig
+				// collect data about all peers
+				for _, p := range peerList {
+					wireguardConfing = append(wireguardConfing, p.formatPeer()...)
+				}
+				// write new config to file
+				_ = ioutil.WriteFile("/etc/wireguard/"+os.Getenv("WG_CONFIG_NAME")+".conf", wireguardConfing, 0644)
+				// restart wireguard interface
+				// the WG_RESTART_SCRIPT env var should contain the path to the script
+				//    that restart the wg interface (wg down / wg up)
+				out, err := exec.Command("/bin/bash", os.Getenv("WG_RESTART_SCRIPT")).Output()
+				if err != nil {
+					fmt.Println("Error: ", err)
+				}
+				fmt.Printf("output: %s", out)
+
+				// tell the client everything is OK
+				fmt.Fprintln(w, "OK")
+			}
 		} else {
 			fmt.Fprintln(w, "ERROR! IP or PubKey failed regex check.")
-		}
-
-		// search for pubkeys and IPs
-		// if pubkey is found: do nothing
-		// if IP is found: overwrite pubkey
-		// if nothing is found: add new peer
-		rewriteRequired := false
-		appendRequired := true
-		for _, p := range peerList {
-			if p.PubKey == pubKey {
-				if p.IPAddr == ipAddr+"/32" {
-					fmt.Fprintln(w, "This public key is already registered: ", p)
-					appendRequired = false
-				}
-			} else {
-				if p.IPAddr == ipAddr+"/32" {
-					fmt.Fprintln(w, "Changing public key for IP ", p.IPAddr)
-					p.PubKey = pubKey
-					appendRequired = false
-					rewriteRequired = true
-				}
-			}
-		}
-		if appendRequired {
-			peerList = append(peerList, Peer{IPAddr: ipAddr + "/32", PubKey: pubKey})
-			rewriteRequired = true
-		}
-
-		if !rewriteRequired && regexMatch {
-			// hardcoded wireguard server config
-			wireguardConfing := serverConfig
-			// collect data about all peers
-			for _, p := range peerList {
-				wireguardConfing = append(wireguardConfing, p.formatPeer()...)
-			}
-			// write new config to file
-			_ = ioutil.WriteFile("/etc/wireguard/"+os.Getenv("WG_CONFIG_NAME")+".conf", wireguardConfing, 0644)
-			// restart wireguard interface
-			// the WG_RESTART_SCRIPT env var should contain the path to the script
-			//    that restart the wg interface (wg down / wg up)
-			out, err := exec.Command("/bin/bash", os.Getenv("WG_RESTART_SCRIPT")).Output()
-			if err != nil {
-				fmt.Println("Error: ", err)
-			}
-			fmt.Printf("output: %s", out)
-
-			// tell the client everything is OK
-			fmt.Fprintln(w, "OK")
 		}
 
 	})
