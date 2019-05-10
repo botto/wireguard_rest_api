@@ -20,6 +20,8 @@ func (p *Peer) formatPeer() []byte {
 		"AllowedIPs = " + p.IPAddr + "\n")
 }
 
+var peerList = []Peer{}
+
 func check(e error) {
 	if e != nil {
 		panic(e)
@@ -31,7 +33,6 @@ func populateWireGuardConfig(w http.ResponseWriter, r *http.Request) {
 	// WG_SERVER_CONFIG must contain path to file holding server config
 	serverConfig, err := ioutil.ReadFile(os.Getenv("WG_SERVER_CONFIG"))
 	check(err)
-	peerList := []Peer{}
 
 	ipAddr := r.URL.Query().Get("ip")
 	pubKey := r.URL.Query().Get("pubkey")
