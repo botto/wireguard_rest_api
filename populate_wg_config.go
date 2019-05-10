@@ -76,6 +76,8 @@ func populateWireGuardConfig(w http.ResponseWriter, r *http.Request) {
 			rewriteRequired = true
 		}
 
+		fmt.Println("Rewrite required: ", rewriteRequired)
+		fmt.Println("Peers: ", peerList)
 		if rewriteRequired {
 			// hardcoded wireguard server config
 			wireguardConfing := serverConfig
