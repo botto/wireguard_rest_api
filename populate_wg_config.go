@@ -91,7 +91,7 @@ func populateWireGuardConfig(w http.ResponseWriter, r *http.Request) {
 			// restart wireguard interface
 			// the WG_RESTART_SCRIPT env var should contain the path to the script
 			//    that restart the wg interface (wg down / wg up)
-			out, err := exec.Command("/bin/bash", os.Getenv("WG_RESTART_SCRIPT")).Output()
+			out, err := exec.Command("/bin/bash", os.Getenv("WG_RESTART_SCRIPT")).CombinedOutput()
 			if err != nil {
 				fmt.Println("Error: ", err)
 			}
