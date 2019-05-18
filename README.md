@@ -1,3 +1,5 @@
+__This project is absolute crap at this point. DO NOT USE THIS!__
+
 # WireGuard Go API `work in progress`
 
 GoLang API that helps you manage WireGuard access on nodes. This project is really young, but I would love to work with somebody on it.
