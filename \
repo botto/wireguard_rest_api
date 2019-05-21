@@ -40,13 +40,13 @@ func peers(w http.ResponseWriter, r *http.Request) {
 func privateKey(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		http.Error(w, "You can only PUT the private key and get public key.", http.StatusBadRequest)
+		w.Write([]byte("get private key"))
 	case http.MethodPost:
 		http.Error(w, "Use methods GET or PUT for the private key", http.StatusBadRequest)
 	case http.MethodPut:
-		w.Write([]byte("put private key"))
+		w.Write([]byte("post private key"))
 	case http.MethodDelete:
-		http.Error(w, "PUT another private key instead of just deleting it.", http.StatusBadRequest)
+		http.Error(w, "dude, don't delete your private key", http.StatusBadRequest)
 	default:
 		http.Error(w, "wat", 401)
 	}
@@ -57,11 +57,12 @@ func publicKey(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		w.Write([]byte("get public key"))
 	case http.MethodPost:
-		http.Error(w, "You can only PUT the private key and get public key.", http.StatusBadRequest)
+		http.Error(w, "Use methods GET or PUT for the private key", http.StatusBadRequest)
 	case http.MethodPut:
-		http.Error(w, "You can only PUT the private key and get public key.", http.StatusBadRequest)
+		http.Error(w, "Use methods GET or PUT for the private key", http.StatusBadRequest)
 	case http.MethodDelete:
-		http.Error(w, "What do you think this command is supposed to do?", http.StatusBadRequest)
+		http.Error(w, "dude, don't delete your private key", http.StatusBadRequest)
+		w.Write([]byte("delete public key"))
 	default:
 		http.Error(w, "wat", 401)
 	}
