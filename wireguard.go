@@ -34,8 +34,11 @@ func dGetPeersJSON() []byte {
 	dRefresh()
 	for i, p := range d.Peers {
 		ipString := ""
-		for _, ipn := range p.AllowedIPs {
-			ipString += ipn.String() + " "
+		for ipi, ipn := range p.AllowedIPs {
+			if ipi > 0 {
+				ipString += " "
+			}
+			ipString += ipn.String()
 		}
 
 		newJSON := PeerJSON{
