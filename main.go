@@ -10,7 +10,7 @@ import (
 
 var c = &wgctrl.Client{}
 var d = &wgtypes.Device{}
-var wgInterface string
+var dString string
 
 func peers(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -83,7 +83,7 @@ func authenticateAdmin(f http.HandlerFunc) http.HandlerFunc {
 }
 
 func main() {
-	wgInterface = os.Getenv("WIREGUARD_INTERFACE")
+	dString = os.Getenv("WIREGUARD_INTERFACE")
 	var wgctrlErr error
 	c, wgctrlErr = wgctrl.New()
 	if wgctrlErr != nil {

@@ -21,9 +21,9 @@ type PeerJSON struct {
 // refreshing the device is required before searching IPs
 func dRefresh() {
 	var err error
-	d, err = c.Device(wgInterface)
+	d, err = c.Device(dString)
 	if err != nil {
-		fmt.Println("could not get wireguard device from env var WIREGUARD_INTERFACE: ", wgInterface)
+		fmt.Println("could not get wireguard device from env var WIREGUARD_INTERFACE: ", dString)
 		fmt.Println("ERROR: ", err)
 		panic(err)
 	}
@@ -32,8 +32,10 @@ func dRefresh() {
 func dGetPeersJSON() []byte {
 	peersJSON := []PeerJSON{}
 	dRefresh()
+
 	for i, p := range d.Peers {
 		ipString := ""
+
 		for ipi, ipn := range p.AllowedIPs {
 			if ipi > 0 {
 				ipString += " "
@@ -50,6 +52,7 @@ func dGetPeersJSON() []byte {
 			BytesReceived: p.ReceiveBytes,
 			BytesSent:     p.TransmitBytes,
 		}
+
 		peersJSON = append(peersJSON, newJSON)
 	}
 
@@ -77,7 +80,7 @@ func dDeletePeer(ks string) error {
 			}
 			// apply config to interface
 			var err error
-			err = c.ConfigureDevice(wgInterface, newConfig)
+			err = c.ConfigureDevice(dString, newConfig)
 			if err != nil {
 				panic(err)
 			}
@@ -121,7 +124,7 @@ func dAddPeer(ks string, ips string) error {
 		Peers:        peers,
 	}
 	// apply config to interface
-	err = c.ConfigureDevice(wgInterface, newConfig)
+	err = c.ConfigureDevice(dString, newConfig)
 	if err != nil {
 		return err
 	}
