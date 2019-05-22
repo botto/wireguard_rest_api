@@ -1,12 +1,22 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"net"
-	"strconv"
 )
+
+type PeerJSON struct {
+	PeerLoopIndex int
+	PublicKey     string
+	AllowedIPs    string
+	Endpoint      string
+	LastHandshake string
+	BytesReceived int64
+	BytesSent     int64
+}
 
 // refreshing the device is required before searching IPs
 func dRefresh() {
@@ -19,27 +29,28 @@ func dRefresh() {
 	}
 }
 
-func dGetPeersJSON() string {
-	r := "{"
+func dGetPeersJSON() []byte {
+	peersJSON := []PeerJSON{}
 	dRefresh()
 	for i, p := range d.Peers {
-		if i > 0 {
-			r += ","
-		}
-		r += "\n\n    {"
-		r += "\n    peerLoopIndex: " + strconv.Itoa(i)
-		r += ",\n    publicKey: \"" + p.PublicKey.String()
-		r += "\",\n    AllowedIPs: \""
+		ipString := ""
 		for _, ipn := range p.AllowedIPs {
-			r += ipn.String() + " "
+			ipString += ipn.String() + " "
 		}
-		r += "\",\n    endpoint: \"" + p.Endpoint.String()
-		r += "\",\n    lastHandshake: \"" + p.LastHandshakeTime.String()
-		r += "\",\n    bytesReceived: " + strconv.FormatInt(p.ReceiveBytes, 10)
-		r += ",\n    bytesSent: " + strconv.FormatInt(p.TransmitBytes, 10)
-		r += "\n    }"
+
+		newJSON := PeerJSON{
+			PeerLoopIndex: i,
+			PublicKey:     p.PublicKey.String(),
+			Endpoint:      p.Endpoint.String(),
+			AllowedIPs:    ipString,
+			LastHandshake: p.LastHandshakeTime.String(),
+			BytesReceived: p.ReceiveBytes,
+			BytesSent:     p.TransmitBytes,
+		}
+		peersJSON = append(peersJSON, newJSON)
 	}
-	r = r + "\n}"
+
+	r, _ := json.MarshalIndent(peersJSON, "", "    ")
 	return r
 }
 
