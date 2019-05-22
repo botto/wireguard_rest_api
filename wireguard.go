@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"net"
@@ -60,38 +59,31 @@ func dGetPeersJSON() []byte {
 	return r
 }
 
-func dDeletePeer(k string) error {
-	_, err := wgtypes.ParseKey(k)
+func dDeletePeer(ks string) error {
+	k, err := wgtypes.ParseKey(ks)
 	if err != nil {
 		return err
 	}
-	dRefresh()
-	for _, p := range d.Peers {
-		if p.PublicKey.String() == k {
-			peers := []wgtypes.PeerConfig{
-				{
-					PublicKey: p.PublicKey,
-					Remove:    true,
-				},
-			}
-			newConfig := wgtypes.Config{
-				ReplacePeers: false,
-				Peers:        peers,
-			}
-			// apply config to interface
-			err := c.ConfigureDevice(dString, newConfig)
-			if err != nil {
-				return err
-			}
-			return nil
-		}
+	peers := []wgtypes.PeerConfig{
+		{
+			PublicKey: k,
+			Remove:    true,
+		},
 	}
-	return errors.New("key not found")
+	newConfig := wgtypes.Config{
+		ReplacePeers: false,
+		Peers:        peers,
+	}
+	// apply config to interface
+	err = c.ConfigureDevice(dString, newConfig)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func dAddPeer(ks string, ips string) error {
 
-	fmt.Println("pubkey: ", ks)
 	k, err := wgtypes.ParseKey(ks)
 	if err != nil {
 		return err
@@ -101,29 +93,21 @@ func dAddPeer(ks string, ips string) error {
 		return err
 	}
 
-	dRefresh()
-	ipList := []net.IPNet{
-		*ip,
-	}
-	for _, p := range d.Peers {
-		if p.PublicKey == k {
-			ipList = append(ipList, p.AllowedIPs...)
-		}
-	}
-
+	// create config var
 	peers := []wgtypes.PeerConfig{
 		{
 			PublicKey:         k,
 			ReplaceAllowedIPs: true,
-			AllowedIPs:        ipList,
+			AllowedIPs: []net.IPNet{
+				*ip,
+			},
 		},
 	}
-
-	// create config var
 	newConfig := wgtypes.Config{
 		ReplacePeers: false,
 		Peers:        peers,
 	}
+
 	// apply config to interface
 	err = c.ConfigureDevice(dString, newConfig)
 	if err != nil {

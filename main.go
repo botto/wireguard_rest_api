@@ -23,7 +23,7 @@ func peers(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusConflict)
 		} else {
-			w.Write([]byte("public key added"))
+			w.Write([]byte("OK"))
 		}
 	case http.MethodDelete:
 		err := dDeletePeer(r.URL.Query().Get("pubkey"))
