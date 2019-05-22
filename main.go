@@ -39,16 +39,10 @@ func peers(w http.ResponseWriter, r *http.Request) {
 
 func privateKey(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
-	case http.MethodGet:
-		http.Error(w, "You can only PUT the private key and get public key.", http.StatusBadRequest)
-	case http.MethodPost:
-		http.Error(w, "Use methods GET or PUT for the private key", http.StatusBadRequest)
 	case http.MethodPut:
 		w.Write([]byte("This should actually work, but I didn't write the code yet."))
-	case http.MethodDelete:
-		http.Error(w, "PUT another private key instead of just deleting it.", http.StatusBadRequest)
 	default:
-		http.Error(w, "wat", http.StatusBadRequest)
+		http.Error(w, "You can only PUT the private key and GET public key.", http.StatusBadRequest)
 	}
 }
 
@@ -56,14 +50,8 @@ func publicKey(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		w.Write([]byte(dPublicKey()))
-	case http.MethodPost:
-		http.Error(w, "You can only PUT the private key and get public key.", http.StatusBadRequest)
-	case http.MethodPut:
-		http.Error(w, "You can only PUT the private key and get public key.", http.StatusBadRequest)
-	case http.MethodDelete:
-		http.Error(w, "What do you think this command is supposed to do?", http.StatusBadRequest)
 	default:
-		http.Error(w, "wat", http.StatusBadRequest)
+		http.Error(w, "You can only PUT the private key and GET public key.", http.StatusBadRequest)
 	}
 }
 
