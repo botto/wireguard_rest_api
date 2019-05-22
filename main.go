@@ -16,8 +16,6 @@ func peers(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		w.Write(dGetPeersJSON())
-	case http.MethodPost:
-		http.Error(w, "Available methods: GET, PUT, DELETE", http.StatusBadRequest)
 	case http.MethodPut:
 		err := dAddPeer(r.URL.Query().Get("pubkey"), r.URL.Query().Get("ip"))
 		if err != nil {
