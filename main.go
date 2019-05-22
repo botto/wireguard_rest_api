@@ -17,23 +17,23 @@ func peers(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		w.Write(dGetPeersJSON())
 	case http.MethodPost:
-		w.Write([]byte("post peers"))
+		http.Error(w, "Available methods: GET, PUT, DELETE", http.StatusBadRequest)
 	case http.MethodPut:
 		err := dAddPeer(r.URL.Query().Get("pubkey"), r.URL.Query().Get("ip"))
 		if err != nil {
 			w.Write([]byte("public key added"))
 		} else {
-			http.Error(w, err.Error(), http.StatusForbidden)
+			http.Error(w, err.Error(), http.StatusConflict)
 		}
 	case http.MethodDelete:
 		err := dDeletePeer(r.URL.Query().Get("pubkey"))
 		if err != nil {
-			w.Write([]byte("ublic key deleted"))
+			w.Write([]byte("peer deleted"))
 		} else {
 			http.Error(w, err.Error(), http.StatusForbidden)
 		}
 	default:
-		http.Error(w, "wat", 401)
+		http.Error(w, "Available methods: GET, PUT, DELETE", http.StatusBadRequest)
 	}
 }
 
@@ -44,18 +44,18 @@ func privateKey(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		http.Error(w, "Use methods GET or PUT for the private key", http.StatusBadRequest)
 	case http.MethodPut:
-		w.Write([]byte("put private key"))
+		w.Write([]byte("This should actually work, but I didn't write the code yet."))
 	case http.MethodDelete:
 		http.Error(w, "PUT another private key instead of just deleting it.", http.StatusBadRequest)
 	default:
-		http.Error(w, "wat", 401)
+		http.Error(w, "wat", http.StatusBadRequest)
 	}
 }
 
 func publicKey(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		w.Write([]byte("get public key"))
+		w.Write([]byte(dPublicKey()))
 	case http.MethodPost:
 		http.Error(w, "You can only PUT the private key and get public key.", http.StatusBadRequest)
 	case http.MethodPut:
@@ -63,7 +63,7 @@ func publicKey(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		http.Error(w, "What do you think this command is supposed to do?", http.StatusBadRequest)
 	default:
-		http.Error(w, "wat", 401)
+		http.Error(w, "wat", http.StatusBadRequest)
 	}
 }
 

@@ -130,3 +130,8 @@ func dAddPeer(ks string, ips string) error {
 	}
 	return nil
 }
+
+func dPublicKey() string {
+	dRefresh()
+	return d.PublicKey.String()
+}
