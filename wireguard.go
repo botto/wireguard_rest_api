@@ -60,17 +60,17 @@ func dGetPeersJSON() []byte {
 	return r
 }
 
-func dDeletePeer(ks string) error {
-	k, err := wgtypes.NewKey([]byte(ks))
+func dDeletePeer(k string) error {
+	_, err := wgtypes.ParseKey(k)
 	if err != nil {
 		return err
 	}
 	dRefresh()
 	for _, p := range d.Peers {
-		if p.PublicKey == k {
+		if p.PublicKey.String() == k {
 			peers := []wgtypes.PeerConfig{
 				{
-					PublicKey: k,
+					PublicKey: p.PublicKey,
 					Remove:    true,
 				},
 			}
@@ -79,22 +79,20 @@ func dDeletePeer(ks string) error {
 				Peers:        peers,
 			}
 			// apply config to interface
-			var err error
-			err = c.ConfigureDevice(dString, newConfig)
+			err := c.ConfigureDevice(dString, newConfig)
 			if err != nil {
-				panic(err)
+				return err
 			}
 			return nil
-		} else {
-			err := errors.New("key not found")
-			return err
 		}
 	}
-	return errors.New("something horrible happened")
+	return errors.New("key not found")
 }
 
 func dAddPeer(ks string, ips string) error {
-	k, err := wgtypes.NewKey([]byte(ks))
+
+	fmt.Println("pubkey: ", ks)
+	k, err := wgtypes.ParseKey(ks)
 	if err != nil {
 		return err
 	}
@@ -102,6 +100,7 @@ func dAddPeer(ks string, ips string) error {
 	if err != nil {
 		return err
 	}
+
 	dRefresh()
 	ipList := []net.IPNet{
 		*ip,
@@ -111,6 +110,7 @@ func dAddPeer(ks string, ips string) error {
 			ipList = append(ipList, p.AllowedIPs...)
 		}
 	}
+
 	peers := []wgtypes.PeerConfig{
 		{
 			PublicKey:         k,
@@ -118,6 +118,7 @@ func dAddPeer(ks string, ips string) error {
 			AllowedIPs:        ipList,
 		},
 	}
+
 	// create config var
 	newConfig := wgtypes.Config{
 		ReplacePeers: false,
@@ -128,6 +129,7 @@ func dAddPeer(ks string, ips string) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

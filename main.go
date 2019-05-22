@@ -21,16 +21,16 @@ func peers(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPut:
 		err := dAddPeer(r.URL.Query().Get("pubkey"), r.URL.Query().Get("ip"))
 		if err != nil {
-			w.Write([]byte("public key added"))
-		} else {
 			http.Error(w, err.Error(), http.StatusConflict)
+		} else {
+			w.Write([]byte("public key added"))
 		}
 	case http.MethodDelete:
 		err := dDeletePeer(r.URL.Query().Get("pubkey"))
 		if err != nil {
-			w.Write([]byte("peer deleted"))
-		} else {
 			http.Error(w, err.Error(), http.StatusForbidden)
+		} else {
+			w.Write([]byte("peer deleted"))
 		}
 	default:
 		http.Error(w, "Available methods: GET, PUT, DELETE", http.StatusBadRequest)
