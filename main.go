@@ -15,7 +15,7 @@ var wgInterface string
 func peers(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		w.Write([]byte("get peers"))
+		w.Write([]byte(dGetPeersJSON()))
 	case http.MethodPost:
 		w.Write([]byte("post peers"))
 	case http.MethodPut:
