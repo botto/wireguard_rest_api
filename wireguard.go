@@ -185,7 +185,7 @@ func dPublicKey() string {
 
 func dPort() string {
 	dRefresh()
-	return string(d.ListenPort)
+	return strconv.Itoa(d.ListenPort)
 }
 
 func dNewKeyPair() []byte {
