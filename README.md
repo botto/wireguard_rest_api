@@ -63,7 +63,7 @@ $ curl -k -G --user "user:pass"  "https://192.168.121.126:31337/peers"
         "BytesReceived": 87156,
         "BytesSent": 97600
     }
-]%
+]
 ```
 
 ### get only public key
@@ -86,11 +86,11 @@ T3xGx1AEg2RhLfwxoVsRy/BrOcVM9pWQ4o7zcQiFhnU=
 
 ## Running with Docker
 
-The server will run by default on port 31337, but you can change that in [docker start.sh](https://gitlab.com/gun1x/wireguard_go_api/blob/master/start.sh).
+The server will run by default on port 31337, but you can change that in [docker start.sh](https://gitlab.com/gun1x/wireguard_rest_api/blob/master/start.sh).
 
 ```
-docker pull "registry.gitlab.com/gun1x/wireguard_go_api"
-docker rm --force "wireguard_go_api"
+docker pull "registry.gitlab.com/gun1x/wireguard_rest_api"
+docker rm --force "wireguard_rest_api"
 docker run \
   --rm \
   --net=host \
@@ -98,12 +98,12 @@ docker run \
   --env WIREGUARD_INTERFACE=wg1337 \
   --env WIREGUARD_ADMIN=user \
   --env WIREGUARD_ADMIN_PASS=pass \
-  --name wireguard_go_api \
-  -it "registry.gitlab.com/gun1x/wireguard_go_api"
+  --name wireguard_rest_api \
+  -it "registry.gitlab.com/gun1x/wireguard_rest_api"
 ```
 
 ## Running without docker
 
 The server can run without Docker, as long as it has the environment variables. Let me know if you consider you need better documnetation for this.
 
-The interface must be created before the server is started, as detailed in the [docker start.sh](https://gitlab.com/gun1x/wireguard_go_api/blob/master/start.sh), which is a good example of how to run the server, and should work on any distribution.
+The interface must be created before the server is started, as detailed in the [docker start.sh](https://gitlab.com/gun1x/wireguard_rest_api/blob/master/start.sh), which is a good example of how to run the server, and should work on any distribution.

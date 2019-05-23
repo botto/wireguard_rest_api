@@ -14,4 +14,4 @@ openssl req -new -x509 -sha256 -key server.key -out server.crt -days 3650 \
   -subj "/C=RO/ST=B/L=B/O=CG/OU=Infra/CN=CG/emailAddress=gheorghe@linux.com"
 
 # run the webserver
-/opt/wireguard_go_api ":31337"
+/opt/wireguard_rest_api ":31337"
