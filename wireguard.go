@@ -8,6 +8,12 @@ import (
 	"strconv"
 )
 
+type ClientOutput struct {
+	Status  string `json:"status"`
+	Message string `json:"message,omitempty"`
+	Error   string `json:"error,omitempty"`
+}
+
 type PeerJSON struct {
 	PeerLoopIndex int
 	PublicKey     string
@@ -25,6 +31,15 @@ type DeviceJSON struct {
 	FirewallMark int
 	ListenPort   int
 	Message      string
+}
+
+func (o *ClientOutput) bytes() []byte {
+	jsonData, err := json.MarshalIndent(o, "", "    ")
+	if err != nil {
+		fmt.Println("Error parsing JSON: ", o)
+		panic(err)
+	}
+	return jsonData
 }
 
 // refreshing the device is required before searching IPs
@@ -83,10 +98,17 @@ func dGetPeersJSON() []byte {
 	return r
 }
 
-func dDeletePeer(ks string) error {
+func dDeletePeer(ks string) []byte {
+	o := ClientOutput{
+		Status:  "OK",
+		Message: "peer " + ks + " deleted",
+	}
 	k, err := wgtypes.ParseKey(ks)
 	if err != nil {
-		return err
+		o.Status = "ERROR"
+		o.Message = "bad public key"
+		o.Error = err.Error()
+		return o.bytes()
 	}
 	peers := []wgtypes.PeerConfig{
 		{
@@ -100,18 +122,34 @@ func dDeletePeer(ks string) error {
 	}
 	// apply config to interface
 	err = c.ConfigureDevice(dString, newConfig)
-	return err
+
+	if err != nil {
+		o.Status = "ERROR"
+		o.Message = "Peer deletion failed"
+		o.Error = err.Error()
+	}
+	return o.bytes()
 }
 
-func dAddPeer(ks string, ips string) error {
+func dAddPeer(ks string, ips string) []byte {
 
+	o := ClientOutput{
+		Status:  "OK",
+		Message: "peer " + ks + " added",
+	}
 	k, err := wgtypes.ParseKey(ks)
 	if err != nil {
-		return err
+		o.Status = "ERROR"
+		o.Message = "bad public key"
+		o.Error = err.Error()
+		return o.bytes()
 	}
 	_, ip, err := net.ParseCIDR(ips)
 	if err != nil {
-		return err
+		o.Status = "ERROR"
+		o.Message = "bad CIDR"
+		o.Error = err.Error()
+		return o.bytes()
 	}
 
 	// create config var
@@ -132,7 +170,12 @@ func dAddPeer(ks string, ips string) error {
 	// apply config to interface
 	err = c.ConfigureDevice(dString, newConfig)
 
-	return err
+	if err != nil {
+		o.Status = "ERROR"
+		o.Message = "wg ConfigureDevice failed"
+		o.Error = err.Error()
+	}
+	return o.bytes()
 }
 
 func dPublicKey() string {
@@ -145,12 +188,19 @@ func dPort() string {
 	return string(d.ListenPort)
 }
 
-func dNewKeyPair() error {
+func dNewKeyPair() []byte {
+	o := ClientOutput{
+		Status:  "OK",
+		Message: "GET public key at /publicKey",
+	}
 	dRefresh()
 
 	privateKey, err := wgtypes.GeneratePrivateKey()
 	if err != nil {
-		return err
+		o.Status = "ERROR"
+		o.Message = "wgtypes.GeneratePrivateKey() failed"
+		o.Error = err.Error()
+		return o.bytes()
 	}
 
 	newConfig := wgtypes.Config{
@@ -159,14 +209,26 @@ func dNewKeyPair() error {
 
 	// apply config to interface
 	err = c.ConfigureDevice(dString, newConfig)
-	return err
+	if err != nil {
+		o.Status = "ERROR"
+		o.Message = "wg ConfigureDevice failed"
+		o.Error = err.Error()
+	}
+	return o.bytes()
 }
 
-func dSetPort(ps string) error {
+func dSetPort(ps string) []byte {
 
+	o := ClientOutput{
+		Status:  "OK",
+		Message: "port set to " + ps,
+	}
 	p, err := strconv.Atoi(ps)
 	if err != nil {
-		return err
+		o.Status = "ERROR"
+		o.Message = "was your port an int?"
+		o.Error = err.Error()
+		return o.bytes()
 	}
 
 	newConfig := wgtypes.Config{
@@ -175,5 +237,10 @@ func dSetPort(ps string) error {
 
 	// apply config to interface
 	err = c.ConfigureDevice(dString, newConfig)
-	return err
+	if err != nil {
+		o.Status = "ERROR"
+		o.Message = "wg ConfigureDevice failed"
+		o.Error = err.Error()
+	}
+	return o.bytes()
 }

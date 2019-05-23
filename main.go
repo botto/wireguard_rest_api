@@ -13,7 +13,7 @@ var d = &wgtypes.Device{}
 var dString string
 
 func rootDump(w http.ResponseWriter, r *http.Request) {
-	message := "available methods: /peers /privateKey /publicKey /listenPort"
+	message := "available commands: /peers /privateKey /publicKey /listenPort"
 	w.Write(dDumpData(message))
 }
 
@@ -22,71 +22,79 @@ func peers(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		w.Write(dGetPeersJSON())
 	case http.MethodPut:
-		err := dAddPeer(r.URL.Query().Get("pubkey"), r.URL.Query().Get("ip"))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusConflict)
-		} else {
-			w.Write([]byte("OK"))
-		}
+		w.Write(dAddPeer(r.URL.Query().Get("pubkey"), r.URL.Query().Get("ip")))
 	case http.MethodDelete:
-		err := dDeletePeer(r.URL.Query().Get("pubkey"))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusForbidden)
-		} else {
-			w.Write([]byte("peer deleted"))
-		}
+		w.Write(dDeletePeer(r.URL.Query().Get("pubkey")))
 	default:
-		http.Error(w, "Available methods: GET, PUT, DELETE", http.StatusBadRequest)
+		http.Error(w, `{
+			"status: "ERROR",
+			"message:" "Available methods for /peers are GET, PUT, DELETE"
+			"error:" "bad method"
+		}`, http.StatusBadRequest)
 	}
 }
 
 func privateKey(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodDelete:
-		err := dNewKeyPair()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		} else {
-			w.Write([]byte("OK; GET /publicKey "))
-		}
+		w.Write(dNewKeyPair())
 	default:
-		http.Error(w, "Use the DELETE request to generate a new key pair, or GET the /publicKey", http.StatusBadRequest)
+		http.Error(w, `{
+			"status: "ERROR",
+			"message:" "Use the DELETE request to generate a new key pair, or GET the /publicKey"
+			"error:" "bad method"
+		}`, http.StatusBadRequest)
 	}
 }
 
 func publicKey(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		w.Write([]byte(dPublicKey()))
+		w.Write([]byte(`{"PublicKey": "` + dPublicKey() + `"}`))
 	default:
-		http.Error(w, "You can only GET the public key.", http.StatusBadRequest)
+		http.Error(w, `{
+			"status: "ERROR",
+			"message:" "You can only GET the public key."
+			"error:" "bad method"
+		}`, http.StatusBadRequest)
 	}
 }
 
 func listenPort(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		w.Write([]byte(dPort()))
+		w.Write([]byte(`{"ListenPort": ` + dPort() + `}`))
 	case http.MethodPut:
-		err := dSetPort(r.URL.Query().Get("pubkey"))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusNotFound)
-		} else {
-			w.Write([]byte("port changed"))
-		}
+		w.Write(dSetPort(r.URL.Query().Get("pubkey")))
 	default:
-		http.Error(w, "GET current port, or PUT the new port.", http.StatusBadRequest)
+		http.Error(w, `{
+			"status: "ERROR",
+			"message:" "GET current port, or PUT the new port."
+			"error:" "bad method"
+		}`, http.StatusBadRequest)
 	}
 }
 
 func authenticateAdmin(f http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if rec := recover(); r != nil {
+				fmt.Println("Recover Triggered: ", rec)
+				http.Error(w, "Internal server error. Check server logs.", 501)
+			}
+		}()
+
 		user, pass, _ := r.BasicAuth()
 		if user != os.Getenv("WIREGUARD_ADMIN") || pass != os.Getenv("WIREGUARD_ADMIN_PASS") {
 			if r.Method == http.MethodGet {
 				f(w, r)
 			} else {
 				http.Error(w, "Method not authorized", 401)
+				http.Error(w, `{
+			"status: "ERROR",
+			"message:" "Only GET is allowed without authentication",
+			"error:" "bad credentials"
+		}`, http.StatusUnauthorized)
 			}
 		} else {
 			f(w, r)
