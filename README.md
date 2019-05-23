@@ -2,15 +2,17 @@
 
 *If you need any modifications/improvements to this project, please let me know.*
 
-This webserver allows you to control one wireguard interface located on the server. It allows you to get information about the WireGuard device, and also about the Peers configured on the device. Of course, you can also modify all of this information.
+This webserver allows you to control one wireguard interface located on the server. It allows you to get/set configuration of the WireGuard device, and also about the Peers configured on the device.
 
-All the GET commands require no authentication. All the PUT/DELETE commands require authentication.
+All the GET commands do not require authentication. All the PUT/DELETE commands require authentication.
+
+Currently one server can manage only one wireguard device. This could change in the future, if anybody needs one server that manages multiple interfaces.
 
 ## Usage examples:
 
 ### get all information
-```json
-$ curl -k "https://192.168.121.126:31337/"
+```bash
+$ curl -k "https://192.168.121.126:31337/"
 {
     "Name": "internal",
     "Type": "Linux kernel",
@@ -22,8 +24,8 @@ $ curl -k "https://192.168.121.126:31337/"
 ```
 
 ### get all the peers
-```json
- $ curl -k -G --user "user:pass"  "https://192.168.121.126:31337/peers"    
+```bash
+$ curl -k -G --user "user:pass"  "https://192.168.121.126:31337/peers"    
 [
     {
         "PeerLoopIndex": 0,
@@ -71,7 +73,7 @@ T9/CnCKchS8DCxWWiEqVUoW3rWrxLYrdimWGUpAa03w=
 ```
 
 ### change the private key
-```
+```bash
  $ curl -k "https://192.168.121.126:31337/privateKey"
 Use the DELETE request to generate a new key pair, or GET the /publicKey
 
