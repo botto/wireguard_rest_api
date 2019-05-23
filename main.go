@@ -69,7 +69,7 @@ func listenPort(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		w.Write([]byte(`{ "ListenPort": ` + dPort() + ` }`))
 	case http.MethodPut:
-		w.Write(dSetPort(r.URL.Query().Get("pubkey")))
+		w.Write(dSetPort(r.URL.Query().Get("port")))
 	default:
 		o := ClientOutput{
 			Status:  "ERROR",
