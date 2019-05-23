@@ -1,12 +1,12 @@
 package main
 
 import (
+	"crypto/subtle"
 	"fmt"
 	"golang.zx2c4.com/wireguard/wgctrl"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"net/http"
 	"os"
-	"subtle"
 )
 
 var c = &wgctrl.Client{}
@@ -81,7 +81,7 @@ func listenPort(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func authenticateAdmin(f http.HandlerFunc) http.HandlerFunc {
+func globalMiddleware(f http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -90,11 +90,13 @@ func authenticateAdmin(f http.HandlerFunc) http.HandlerFunc {
 			}
 		}()
 
+		w.Header().Add("Content-Type", "application/json")
+
 		// use subtle.ConstantTimeCompare() to prevent timing attack
 		user, pass, _ := r.BasicAuth()
-		userBool := subtle.ConstantTimeCompare([]byte(user), []byte(os.Getenv("WIREGUARD_ADMIN")))
-		passBool := subtle.ConstantTimeCompare([]byte(pass), []byte(os.Getenv("WIREGUARD_ADMIN_PASS")))
-		authBool := userBool && passBool
+		userResult := subtle.ConstantTimeCompare([]byte(user), []byte(os.Getenv("WIREGUARD_ADMIN")))
+		passResult := subtle.ConstantTimeCompare([]byte(pass), []byte(os.Getenv("WIREGUARD_ADMIN_PASS")))
+		authBool := (userResult == 1) && (passResult == 1)
 		if authBool {
 			if r.Method == http.MethodGet {
 				f(w, r)
@@ -119,10 +121,10 @@ func main() {
 	if wgctrlErr != nil {
 		fmt.Println("Wireguard error: ", wgctrlErr)
 	}
-	http.HandleFunc("/", rootDump)
-	http.HandleFunc("/privateKey", authenticateAdmin(privateKey))
-	http.HandleFunc("/publicKey", authenticateAdmin(publicKey))
-	http.HandleFunc("/listenPort", authenticateAdmin(listenPort))
-	http.HandleFunc("/peers", authenticateAdmin(peers))
+	http.HandleFunc("/", globalMiddleware(rootDump))
+	http.HandleFunc("/privateKey", globalMiddleware(privateKey))
+	http.HandleFunc("/publicKey", globalMiddleware(publicKey))
+	http.HandleFunc("/listenPort", globalMiddleware(listenPort))
+	http.HandleFunc("/peers", globalMiddleware(peers))
 	http.ListenAndServeTLS(os.Args[1], "server.crt", "server.key", nil)
 }
