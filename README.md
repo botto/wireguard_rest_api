@@ -1,6 +1,6 @@
 # WireGuard REST API
 
-*If you need any modifications/improvements to this project, please let me know.*
+*If you need any modifications/improvements to this project, please let me know. There is still some work to be done on the project, to get all answers/errors in JSON.*
 
 This webserver allows you to control one wireguard interface located on the server. It allows you to get/set configuration of the WireGuard device, and also about the Peers configured on the device.
 
