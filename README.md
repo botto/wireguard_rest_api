@@ -53,15 +53,6 @@ $ curl -k -G --user "user:pass" "https://server:31337/peers"
         "LastHandshake": "2019-05-21 13:31:12.186561752 +0000 UTC",
         "BytesReceived": 92740,
         "BytesSent": 97424
-    },
-    {
-        "PeerLoopIndex": 3,
-        "PublicKey": "5BOKXCPoJuinKTA8vDaW8PAHhS3i4YXpDPJcQpbAITE=",
-        "AllowedIPs": "10.100.0.4/32",
-        "Endpoint": "192.168.121.16:40825",
-        "LastHandshake": "2019-05-21 13:31:01.855872764 +0000 UTC",
-        "BytesReceived": 87156,
-        "BytesSent": 97600
     }
 ]
 ```
