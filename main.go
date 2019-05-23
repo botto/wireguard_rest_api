@@ -92,9 +92,9 @@ func authenticateAdmin(f http.HandlerFunc) http.HandlerFunc {
 
 		// use subtle.ConstantTimeCompare() to prevent timing attack
 		user, pass, _ := r.BasicAuth()
-		userEnv := []byte(os.Getenv("WIREGUARD_ADMIN"))
-		passEnv := []byte(os.Getenv("WIREGUARD_ADMIN_PASS"))
-		authBool := (subtle.ConstantTimeCompare([]byte(user), userEnv)) && (subtle.ConstantTimeCompare([]byte(pass), passEnv))
+		userBool := subtle.ConstantTimeCompare([]byte(user), []byte(os.Getenv("WIREGUARD_ADMIN")))
+		passBool := subtle.ConstantTimeCompare([]byte(pass), []byte(os.Getenv("WIREGUARD_ADMIN_PASS")))
+		authBool := userBool && passBool
 		if authBool {
 			if r.Method == http.MethodGet {
 				f(w, r)
