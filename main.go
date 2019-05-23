@@ -27,9 +27,9 @@ func peers(w http.ResponseWriter, r *http.Request) {
 		w.Write(dDeletePeer(r.URL.Query().Get("pubkey")))
 	default:
 		http.Error(w, `{
-			"status: "ERROR",
-			"message:" "Available methods for /peers are GET, PUT, DELETE"
-			"error:" "bad method"
+			"status": "ERROR",
+			"message": "Available methods for /peers are GET, PUT, DELETE"
+			"error": "bad method"
 		}`, http.StatusBadRequest)
 	}
 }
@@ -40,9 +40,9 @@ func privateKey(w http.ResponseWriter, r *http.Request) {
 		w.Write(dNewKeyPair())
 	default:
 		http.Error(w, `{
-			"status: "ERROR",
-			"message:" "Use the DELETE request to generate a new key pair, or GET the /publicKey"
-			"error:" "bad method"
+			"status": "ERROR",
+			"message": "Use the DELETE request to generate a new key pair, or GET the /publicKey"
+			"error": "bad method"
 		}`, http.StatusBadRequest)
 	}
 }
@@ -53,9 +53,9 @@ func publicKey(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"PublicKey": "` + dPublicKey() + `"}`))
 	default:
 		http.Error(w, `{
-			"status: "ERROR",
-			"message:" "You can only GET the public key."
-			"error:" "bad method"
+			"status": "ERROR",
+			"message": "You can only GET the public key."
+			"error": "bad method"
 		}`, http.StatusBadRequest)
 	}
 }
@@ -68,9 +68,9 @@ func listenPort(w http.ResponseWriter, r *http.Request) {
 		w.Write(dSetPort(r.URL.Query().Get("pubkey")))
 	default:
 		http.Error(w, `{
-			"status: "ERROR",
-			"message:" "GET current port, or PUT the new port."
-			"error:" "bad method"
+			"status": "ERROR",
+			"message": "GET current port, or PUT the new port."
+			"error": "bad method"
 		}`, http.StatusBadRequest)
 	}
 }
@@ -80,7 +80,7 @@ func authenticateAdmin(f http.HandlerFunc) http.HandlerFunc {
 		defer func() {
 			if rec := recover(); r != nil {
 				fmt.Println("Recover Triggered: ", rec)
-				http.Error(w, "Internal server error. Check server logs.", 501)
+				http.Error(w, "", 501)
 			}
 		}()
 
@@ -89,12 +89,11 @@ func authenticateAdmin(f http.HandlerFunc) http.HandlerFunc {
 			if r.Method == http.MethodGet {
 				f(w, r)
 			} else {
-				http.Error(w, "Method not authorized", 401)
 				http.Error(w, `{
-			"status: "ERROR",
-			"message:" "Only GET is allowed without authentication",
-			"error:" "bad credentials"
-		}`, http.StatusUnauthorized)
+					"status": "ERROR",
+					"message": "Only GET is allowed without authentication",
+					"error": "bad credentials"
+				}`, http.StatusUnauthorized)
 			}
 		} else {
 			f(w, r)
