@@ -6,6 +6,7 @@ import (
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"net/http"
 	"os"
+	"subtle"
 )
 
 var c = &wgctrl.Client{}
@@ -89,8 +90,12 @@ func authenticateAdmin(f http.HandlerFunc) http.HandlerFunc {
 			}
 		}()
 
+		// use subtle.ConstantTimeCompare() to prevent timing attack
 		user, pass, _ := r.BasicAuth()
-		if user != os.Getenv("WIREGUARD_ADMIN") || pass != os.Getenv("WIREGUARD_ADMIN_PASS") {
+		userEnv := []byte(os.Getenv("WIREGUARD_ADMIN"))
+		passEnv := []byte(os.Getenv("WIREGUARD_ADMIN_PASS"))
+		authBool := (subtle.ConstantTimeCompare([]byte(user), userEnv)) && (subtle.ConstantTimeCompare([]byte(pass), passEnv))
+		if authBool {
 			if r.Method == http.MethodGet {
 				f(w, r)
 			} else {
