@@ -8,12 +8,6 @@ import (
 	"strconv"
 )
 
-type ClientOutput struct {
-	Status  string `json:"status"`
-	Message string `json:"message,omitempty"`
-	Error   string `json:"error,omitempty"`
-}
-
 type PeerJSON struct {
 	PeerLoopIndex int
 	PublicKey     string
@@ -31,6 +25,12 @@ type DeviceJSON struct {
 	FirewallMark int
 	ListenPort   int
 	Message      string
+}
+
+type ClientOutput struct {
+	Status  string `json:"status"`
+	Message string `json:"message,omitempty"`
+	Error   string `json:"error,omitempty"`
 }
 
 func (o *ClientOutput) bytes() []byte {

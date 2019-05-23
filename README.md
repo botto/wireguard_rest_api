@@ -1,6 +1,6 @@
 # WireGuard REST API
 
-*If you need any modifications/improvements to this project, please let me know. There is still some work to be done on the project, to get all answers/errors in JSON.*
+*If you need any modifications/improvements to this project, please let me know.*
 
 This webserver allows you to control one wireguard interface located on the server. It allows you to get/set configuration of the WireGuard device, and also about the Peers configured on the device.
 
@@ -12,20 +12,20 @@ Currently one server can manage only one wireguard device. This could change in 
 
 ### get all information
 ```bash
-$ curl -k "https://192.168.121.126:31337/"
+$ curl -k "https://server:31337/"
 {
     "Name": "internal",
     "Type": "Linux kernel",
-    "PublicKey": "T9/CnCKchS8DCxWWiEqVUoW3rWrxLYrdimWGUpAa03w=",
+    "PublicKey": "YTV4cu1ucfKDej2SqRX91ldU7uT9S+s96/RFJmuwyjg=",
     "FirewallMark": 0,
     "ListenPort": 1337,
-    "Message": "available methods: /peers /privateKey /publicKey /listenPort"
+    "Message": "available commands: /peers /privateKey /publicKey /listenPort"
 }
 ```
 
 ### get all the peers
 ```bash
-$ curl -k -G --user "user:pass"  "https://192.168.121.126:31337/peers"    
+$ curl -k -G --user "user:pass" "https://server:31337/peers"
 [
     {
         "PeerLoopIndex": 0,
@@ -68,20 +68,27 @@ $ curl -k -G --user "user:pass"  "https://192.168.121.126:31337/peers"
 
 ### get only public key
 ```bash
- $ curl -k "https://192.168.121.126:31337/publicKey"
-T9/CnCKchS8DCxWWiEqVUoW3rWrxLYrdimWGUpAa03w=
+ $ curl -k "https://server:31337/publicKey"
+{"PublicKey": "YTV4cu1ucfKDej2SqRX91ldU7uT9S+s96/RFJmuwyjg="}
 ```
 
 ### change the private key
 ```bash
- $ curl -k "https://192.168.121.126:31337/privateKey"
-Use the DELETE request to generate a new key pair, or GET the /publicKey
+ $ curl -k "https://server:31337/privateKey"
+{
+    "status": "ERROR",
+    "message": "Use the DELETE request to generate a new key pair, or GET the /publicKey",
+    "error": "bad HTTP method"
+}
 
- $ curl -X DELETE -k -G --user "user:pass"  "https://192.168.121.126:31337/privateKey"
-OK; GET /publicKey
+ $ curl -X DELETE -k -G --user "user:pass"  "https://server:31337/privateKey"
+{
+    "status": "OK",
+    "message": "GET public key at /publicKey"
+}
 
- $ curl -k "https://192.168.121.126:31337/publicKey"           
-T3xGx1AEg2RhLfwxoVsRy/BrOcVM9pWQ4o7zcQiFhnU=
+ $ curl -k "https://server:31337/publicKey"           
+{ "PublicKey": "daxw/ElaZgOypvBNbAL8es4DotrsxnQagwnFq7Ch5DU=" }
 ```
 
 ## Running with Docker

@@ -26,11 +26,12 @@ func peers(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		w.Write(dDeletePeer(r.URL.Query().Get("pubkey")))
 	default:
-		http.Error(w, `{
-			"status": "ERROR",
-			"message": "Available methods for /peers are GET, PUT, DELETE"
-			"error": "bad method"
-		}`, http.StatusBadRequest)
+		o := ClientOutput{
+			Status:  "ERROR",
+			Message: "Available methods for /peers are GET, PUT, DELETE",
+			Error:   "bad HTTP method",
+		}
+		http.Error(w, string(o.bytes()), http.StatusBadRequest)
 	}
 }
 
@@ -39,47 +40,51 @@ func privateKey(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		w.Write(dNewKeyPair())
 	default:
-		http.Error(w, `{
-			"status": "ERROR",
-			"message": "Use the DELETE request to generate a new key pair, or GET the /publicKey"
-			"error": "bad method"
-		}`, http.StatusBadRequest)
+		o := ClientOutput{
+			Status: "ERROR",
+			Message: "Use the DELETE request to generate a new key pair" +
+				", or GET the /publicKey",
+			Error: "bad HTTP method",
+		}
+		http.Error(w, string(o.bytes()), http.StatusBadRequest)
 	}
 }
 
 func publicKey(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		w.Write([]byte(`{"PublicKey": "` + dPublicKey() + `"}`))
+		w.Write([]byte(`{ "PublicKey": "` + dPublicKey() + `" }`))
 	default:
-		http.Error(w, `{
-			"status": "ERROR",
-			"message": "You can only GET the public key."
-			"error": "bad method"
-		}`, http.StatusBadRequest)
+		o := ClientOutput{
+			Status:  "ERROR",
+			Message: "You can only GET the public key.",
+			Error:   "bad HTTP method",
+		}
+		http.Error(w, string(o.bytes()), http.StatusBadRequest)
 	}
 }
 
 func listenPort(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		w.Write([]byte(`{"ListenPort": ` + dPort() + `}`))
+		w.Write([]byte(`{ "ListenPort": ` + dPort() + ` }`))
 	case http.MethodPut:
 		w.Write(dSetPort(r.URL.Query().Get("pubkey")))
 	default:
-		http.Error(w, `{
-			"status": "ERROR",
-			"message": "GET current port, or PUT the new port."
-			"error": "bad method"
-		}`, http.StatusBadRequest)
+		o := ClientOutput{
+			Status:  "ERROR",
+			Message: "GET current port, or PUT the new port.",
+			Error:   "bad HTTP method",
+		}
+		http.Error(w, string(o.bytes()), http.StatusBadRequest)
 	}
 }
 
 func authenticateAdmin(f http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
-			if rec := recover(); r != nil {
-				fmt.Println("Recover Triggered: ", rec)
+			if r := recover(); r != nil {
+				fmt.Println("Recover Triggered: ", r)
 				http.Error(w, "", 501)
 			}
 		}()
@@ -89,11 +94,12 @@ func authenticateAdmin(f http.HandlerFunc) http.HandlerFunc {
 			if r.Method == http.MethodGet {
 				f(w, r)
 			} else {
-				http.Error(w, `{
-					"status": "ERROR",
-					"message": "Only GET is allowed without authentication",
-					"error": "bad credentials"
-				}`, http.StatusUnauthorized)
+				o := ClientOutput{
+					Status:  "ERROR",
+					Message: "Only GET is allowed without authentication",
+					Error:   "bad credentials",
+				}
+				http.Error(w, string(o.bytes()), http.StatusUnauthorized)
 			}
 		} else {
 			f(w, r)
