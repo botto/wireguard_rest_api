@@ -12,6 +12,11 @@ var c = &wgctrl.Client{}
 var d = &wgtypes.Device{}
 var dString string
 
+func rootDump(w http.ResponseWriter, r *http.Request) {
+	message := "available methods: /peers /privateKey /publicKey /listenPort"
+	w.Write(dDumpData(message))
+}
+
 func peers(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -37,10 +42,15 @@ func peers(w http.ResponseWriter, r *http.Request) {
 
 func privateKey(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
-	case http.MethodPut:
-		w.Write([]byte("This should actually work, but I didn't write the code yet."))
+	case http.MethodDelete:
+		err := dNewKeyPair()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		} else {
+			w.Write([]byte("OK; GET /publicKey "))
+		}
 	default:
-		http.Error(w, "You can only PUT the private key and GET public key.", http.StatusBadRequest)
+		http.Error(w, "Use the DELETE request to generate a new key pair, or GET the /publicKey", http.StatusBadRequest)
 	}
 }
 
@@ -49,7 +59,23 @@ func publicKey(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		w.Write([]byte(dPublicKey()))
 	default:
-		http.Error(w, "You can only PUT the private key and GET public key.", http.StatusBadRequest)
+		http.Error(w, "You can only GET the public key.", http.StatusBadRequest)
+	}
+}
+
+func listenPort(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		w.Write([]byte(dPort()))
+	case http.MethodPut:
+		err := dSetPort(r.URL.Query().Get("pubkey"))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			w.Write([]byte("port changed"))
+		}
+	default:
+		http.Error(w, "GET current port, or PUT the new port.", http.StatusBadRequest)
 	}
 }
 
@@ -75,8 +101,10 @@ func main() {
 	if wgctrlErr != nil {
 		fmt.Println("Wireguard error: ", wgctrlErr)
 	}
+	http.HandleFunc("/", rootDump)
 	http.HandleFunc("/privateKey", authenticateAdmin(privateKey))
 	http.HandleFunc("/publicKey", authenticateAdmin(publicKey))
+	http.HandleFunc("/listenPort", authenticateAdmin(listenPort))
 	http.HandleFunc("/peers", authenticateAdmin(peers))
 	http.ListenAndServeTLS(os.Args[1], "server.crt", "server.key", nil)
 }

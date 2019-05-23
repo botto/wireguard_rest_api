@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"net"
+	"strconv"
 )
 
 type PeerJSON struct {
@@ -17,6 +18,15 @@ type PeerJSON struct {
 	BytesSent     int64
 }
 
+type DeviceJSON struct {
+	Name         string
+	Type         string
+	PublicKey    string
+	FirewallMark int
+	ListenPort   int
+	Message      string
+}
+
 // refreshing the device is required before searching IPs
 func dRefresh() {
 	var err error
@@ -26,6 +36,20 @@ func dRefresh() {
 		fmt.Println("ERROR: ", err)
 		panic(err)
 	}
+}
+
+func dDumpData(message string) []byte {
+	dRefresh()
+	deviceJSON := DeviceJSON{
+		Name:         d.Name,
+		Type:         d.Type.String(),
+		PublicKey:    d.PublicKey.String(),
+		ListenPort:   d.ListenPort,
+		FirewallMark: d.FirewallMark,
+		Message:      message,
+	}
+	r, _ := json.MarshalIndent(deviceJSON, "", "    ")
+	return r
 }
 
 func dGetPeersJSON() []byte {
@@ -76,10 +100,7 @@ func dDeletePeer(ks string) error {
 	}
 	// apply config to interface
 	err = c.ConfigureDevice(dString, newConfig)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func dAddPeer(ks string, ips string) error {
@@ -110,14 +131,49 @@ func dAddPeer(ks string, ips string) error {
 
 	// apply config to interface
 	err = c.ConfigureDevice(dString, newConfig)
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }
 
 func dPublicKey() string {
 	dRefresh()
 	return d.PublicKey.String()
+}
+
+func dPort() string {
+	dRefresh()
+	return string(d.ListenPort)
+}
+
+func dNewKeyPair() error {
+	dRefresh()
+
+	privateKey, err := wgtypes.GeneratePrivateKey()
+	if err != nil {
+		return err
+	}
+
+	newConfig := wgtypes.Config{
+		PrivateKey: &privateKey,
+	}
+
+	// apply config to interface
+	err = c.ConfigureDevice(dString, newConfig)
+	return err
+}
+
+func dSetPort(ps string) error {
+
+	p, err := strconv.Atoi(ps)
+	if err != nil {
+		return err
+	}
+
+	newConfig := wgtypes.Config{
+		ListenPort: &p,
+	}
+
+	// apply config to interface
+	err = c.ConfigureDevice(dString, newConfig)
+	return err
 }
