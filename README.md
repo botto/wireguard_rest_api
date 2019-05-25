@@ -1,4 +1,4 @@
-# WireGuard REST API
+# [WireGuard REST API](https://gitlab.com/gun1x/wireguard_rest_api)
 
 *If you need any modifications/improvements to this project, please let me know.*
 
