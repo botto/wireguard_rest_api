@@ -13,6 +13,10 @@ var c = &wgctrl.Client{}
 var d = &wgtypes.Device{}
 var dString string
 
+func healthz(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("OK"))
+}
+
 func rootDump(w http.ResponseWriter, r *http.Request) {
 	message := "available commands: /peers /privateKey /publicKey /listenPort"
 	w.Write(dDumpData(message))
@@ -121,6 +125,7 @@ func main() {
 	if wgctrlErr != nil {
 		fmt.Println("Wireguard error: ", wgctrlErr)
 	}
+	http.HandleFunc("/healthz", healthz)
 	http.HandleFunc("/", globalMiddleware(rootDump))
 	http.HandleFunc("/privateKey", globalMiddleware(privateKey))
 	http.HandleFunc("/publicKey", globalMiddleware(publicKey))

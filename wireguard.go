@@ -47,7 +47,7 @@ func dRefresh() {
 	var err error
 	d, err = c.Device(dString)
 	if err != nil {
-		fmt.Println("could not get wireguard device from env var WIREGUARD_INTERFACE: ", dString)
+		fmt.Println("could not get wireguard device from env var WIREGUARD_INTERFACE:", dString)
 		fmt.Println("ERROR: ", err)
 		panic(err)
 	}
