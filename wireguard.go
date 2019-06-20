@@ -147,7 +147,7 @@ func dAddPeer(ks string, ips string) []byte {
 	_, ip, err := net.ParseCIDR(ips)
 	if err != nil {
 		o.Status = "ERROR"
-		o.Message = "bad CIDR"
+		o.Message = "bad CIDR; use GET variable ip"
 		o.Error = err.Error()
 		return o.bytes()
 	}

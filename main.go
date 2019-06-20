@@ -101,7 +101,8 @@ func globalMiddleware(f http.HandlerFunc) http.HandlerFunc {
 		userResult := subtle.ConstantTimeCompare([]byte(user), []byte(os.Getenv("WIREGUARD_ADMIN")))
 		passResult := subtle.ConstantTimeCompare([]byte(pass), []byte(os.Getenv("WIREGUARD_ADMIN_PASS")))
 		authBool := (userResult == 1) && (passResult == 1)
-		if authBool {
+		fmt.Print("authentication bool is:", authBool)
+		if !authBool {
 			if r.Method == http.MethodGet {
 				f(w, r)
 			} else {
