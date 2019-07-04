@@ -12,6 +12,7 @@ import (
 var c = &wgctrl.Client{}
 var d = &wgtypes.Device{}
 var dString string
+var dumpFile string
 
 func healthz(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
@@ -115,11 +116,15 @@ func globalMiddleware(f http.HandlerFunc) http.HandlerFunc {
 		} else {
 			f(w, r)
 		}
+		if dumpFile != "" {
+			fmt.Println("write data to", dumpFile)
+		}
 	})
 }
 
 func main() {
 	dString = os.Getenv("WIREGUARD_INTERFACE")
+	dumpFile = os.Getenv("WIREGUARD_DUMP_FILE")
 	var wgctrlErr error
 	c, wgctrlErr = wgctrl.New()
 	if wgctrlErr != nil {
