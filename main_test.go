@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"golang.zx2c4.com/wireguard/wgctrl"
 	"net/http"
@@ -23,10 +24,10 @@ func testMiddleware(t *testing.T, m, u string, handler http.HandlerFunc, auth bo
 		t.Fatal("Wireguard error: ", wgctrlErr)
 	}
 	req, err := http.NewRequest(m, u, nil)
+	os.Setenv("WIREGUARD_ADMIN", "userFoo")
+	os.Setenv("WIREGUARD_ADMIN_PASS", "passBar")
 	if auth {
-		os.Setenv("WIREGUARD_ADMIN", "userFoo")
-		os.Setenv("WIREGUARD_ADMIN", "userBar")
-		req.Header.Set("Authorization", "userFoo passBar")
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte("userFoo:passBar")))
 	}
 	if err != nil {
 		t.Fatal(err)
