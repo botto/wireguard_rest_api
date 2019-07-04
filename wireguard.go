@@ -6,7 +6,10 @@ import (
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"net"
 	"strconv"
+	"sync"
 )
+
+var mutex = &sync.RWMutex{}
 
 type PeerJSON struct {
 	PeerLoopIndex int
@@ -54,6 +57,7 @@ func dRefresh() {
 }
 
 func dDumpData(message string) []byte {
+	mutex.RLock()
 	dRefresh()
 	deviceJSON := DeviceJSON{
 		Name:         d.Name,
@@ -63,12 +67,14 @@ func dDumpData(message string) []byte {
 		FirewallMark: d.FirewallMark,
 		Message:      message,
 	}
+	mutex.RUnlock()
 	r, _ := json.MarshalIndent(deviceJSON, "", "    ")
 	return r
 }
 
 func dGetPeersJSON() []byte {
 	peersJSON := []PeerJSON{}
+	mutex.RLock()
 	dRefresh()
 
 	for i, p := range d.Peers {
@@ -93,6 +99,7 @@ func dGetPeersJSON() []byte {
 
 		peersJSON = append(peersJSON, newJSON)
 	}
+	mutex.RUnlock()
 
 	r, _ := json.MarshalIndent(peersJSON, "", "    ")
 	return r
@@ -121,7 +128,9 @@ func dDeletePeer(ks string) []byte {
 		Peers:        peers,
 	}
 	// apply config to interface
+	mutex.Lock()
 	err = c.ConfigureDevice(dString, newConfig)
+	mutex.Unlock()
 
 	if err != nil {
 		o.Status = "ERROR"
@@ -168,7 +177,9 @@ func dAddPeer(ks string, ips string) []byte {
 	}
 
 	// apply config to interface
+	mutex.Lock()
 	err = c.ConfigureDevice(dString, newConfig)
+	mutex.Unlock()
 
 	if err != nil {
 		o.Status = "ERROR"
@@ -179,11 +190,15 @@ func dAddPeer(ks string, ips string) []byte {
 }
 
 func dPublicKey() string {
+	mutex.RLock()
+	defer mutex.RUnlock()
 	dRefresh()
 	return d.PublicKey.String()
 }
 
 func dPort() string {
+	mutex.RLock()
+	defer mutex.RUnlock()
 	dRefresh()
 	return strconv.Itoa(d.ListenPort)
 }
@@ -193,7 +208,6 @@ func dNewKeyPair() []byte {
 		Status:  "OK",
 		Message: "GET public key at /publicKey",
 	}
-	dRefresh()
 
 	privateKey, err := wgtypes.GeneratePrivateKey()
 	if err != nil {
@@ -208,7 +222,9 @@ func dNewKeyPair() []byte {
 	}
 
 	// apply config to interface
+	mutex.Lock()
 	err = c.ConfigureDevice(dString, newConfig)
+	mutex.Unlock()
 	if err != nil {
 		o.Status = "ERROR"
 		o.Message = "wg ConfigureDevice failed"
@@ -236,7 +252,9 @@ func dSetPort(ps string) []byte {
 	}
 
 	// apply config to interface
+	mutex.Lock()
 	err = c.ConfigureDevice(dString, newConfig)
+	mutex.Unlock()
 	if err != nil {
 		o.Status = "ERROR"
 		o.Message = "wg ConfigureDevice failed"
