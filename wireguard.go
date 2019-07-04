@@ -265,37 +265,38 @@ func dSetPort(ps string) []byte {
 
 func bootstrapFromFile() {
 	dumpFileJSON := getFromFile()
-	privateKey, err := wgtypes.NewKey([]byte(dumpFileJSON.PrivateKey))
+	privateKey, err := wgtypes.ParseKey(dumpFileJSON.PrivateKey)
 	if err != nil {
 		fmt.Println("Could not parse private key")
 		panic(err)
 	}
 	peers := []wgtypes.PeerConfig{}
 	for _, dumpFilePeerJSON := range dumpFileJSON.Peers {
-		publicKey, err := wgtypes.NewKey([]byte(dumpFilePeerJSON.PublicKey))
+		publicKey, err := wgtypes.ParseKey(dumpFilePeerJSON.PublicKey)
 		if err != nil {
 			fmt.Println("Could not parse the public key of one peer")
 			panic(err)
 		}
 		_, allowedIP, err := net.ParseCIDR(dumpFilePeerJSON.AllowedIPs)
 		if err != nil {
+			fmt.Println("One public key not added to peer list.")
 			fmt.Println("Could not parse the IP of one peer. This code does not accept multiple subnets.")
 			fmt.Println("If you need this functionality, fix the code at https://gitlab.com/gun1x/wireguard_rest_api")
 			fmt.Println("I will accept your push request.")
-			panic(err)
+		} else {
+			peers = append(peers, wgtypes.PeerConfig{
+				PublicKey: publicKey,
+				AllowedIPs: []net.IPNet{
+					*allowedIP,
+				},
+			})
 		}
-		peers = append(peers, wgtypes.PeerConfig{
-			PublicKey: publicKey,
-			AllowedIPs: []net.IPNet{
-				*allowedIP,
-			},
-		})
 	}
 	newConfig := wgtypes.Config{
 		PrivateKey: &privateKey,
 		Peers:      peers,
 	}
-	//	// apply config to interface
+	// apply config to interface
 	err = c.ConfigureDevice(dString, newConfig)
 	if err != nil {
 		fmt.Println("could not apply wireguard config")

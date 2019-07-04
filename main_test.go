@@ -52,7 +52,6 @@ func TestHealthCheck(t *testing.T) {
 }
 
 func TestDump(t *testing.T) {
-	getFromFile()
 	responseJSON := DeviceJSON{}
 	status, response := testMiddleware(t, "GET", "/", globalMiddleware(rootDump), false)
 	if status != http.StatusOK {
