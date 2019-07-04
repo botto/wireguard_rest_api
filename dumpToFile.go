@@ -19,6 +19,8 @@ type DumpFilePeerJSON struct {
 
 var dumpToFileTime int64
 
+// this makes the script wait for 3 seconds before writing
+// this will reduce the number of writes, in case of multiple requests
 func dumpToFileRoutine() {
 	go func() {
 		mutex.Lock()
@@ -79,4 +81,29 @@ func dumpToFile() error {
 	log.Println("wrote to file", dumpFile)
 
 	return nil
+}
+
+func getFromFile() DumpFileJSON {
+	dumpFileJSON := DumpFileJSON{}
+
+	f, err := os.Open(dumpFile)
+	if err != nil {
+		log.Println("error opening", dumpFile)
+		panic(err)
+	}
+	fi, err := f.Stat()
+	if err != nil {
+		log.Println("Could not obtain stat, handle error")
+		panic(err)
+	}
+
+	dataFromFile := make([]byte, fi.Size())
+	_, err = f.Read(dataFromFile)
+	if err != nil {
+		log.Println("error reading", dumpFile, err)
+		panic(err)
+	}
+	json.Unmarshal(dataFromFile, &dumpFileJSON)
+
+	return dumpFileJSON
 }
