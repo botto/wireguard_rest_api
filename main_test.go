@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 )
 
 var defaultTestConfig = `Use the following script to configure your device before testing:
@@ -38,6 +39,7 @@ func testMiddleware(t *testing.T, m, u string, handler http.HandlerFunc, auth bo
 }
 
 func TestHealthCheck(t *testing.T) {
+	dumpFile = os.Getenv("WIREGUARD_DUMP_FILE")
 	status, response := testMiddleware(t, "GET", "/healthz", http.HandlerFunc(healthz), false)
 	if status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v",
@@ -170,4 +172,6 @@ func TestDeletePeer(t *testing.T) {
 	if responseJSON.Status != "OK" {
 		t.Error("The response status is not OK:\n", string(response))
 	}
+
+	time.Sleep(4 * time.Second)
 }

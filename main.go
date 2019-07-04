@@ -117,7 +117,7 @@ func globalMiddleware(f http.HandlerFunc) http.HandlerFunc {
 			f(w, r)
 		}
 		if dumpFile != "" {
-			fmt.Println("write data to", dumpFile)
+			dumpToFileRoutine()
 		}
 	})
 }
