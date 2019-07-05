@@ -96,9 +96,13 @@ docker run \
   --env WIREGUARD_INTERFACE=wg1337 \
   --env WIREGUARD_ADMIN=user \
   --env WIREGUARD_ADMIN_PASS=pass \
+  --env WIREGUARD_DUMP_FILE="/root/wireguard_dump" \
+  --volume "/root/wireguard_dump:/root/wireguard_dump:rw" \
   --name wireguard_rest_api \
   -it "registry.gitlab.com/gun1x/wireguard_rest_api"
 ```
+
+`wireguard_dump` can be removed if you do not need reboot persistance. Be aware that `wireguard_dump` will save the private key on the disk.
 
 ## Running without docker
 

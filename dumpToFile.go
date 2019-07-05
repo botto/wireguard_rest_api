@@ -29,10 +29,7 @@ func dumpToFileRoutine() {
 		expectedTimestamp := dumpToFileTime
 		time.Sleep(3 * time.Second)
 		if expectedTimestamp == dumpToFileTime {
-			log.Println("calling dumpToFile()")
 			dumpToFile()
-		} else {
-			log.Println("not calling dumpToFile()")
 		}
 	}()
 }
@@ -78,8 +75,6 @@ func dumpToFile() error {
 		return err
 	}
 
-	log.Println("wrote to file", dumpFile)
-
 	return nil
 }
 
@@ -100,7 +95,7 @@ func getFromFile() DumpFileJSON {
 	dataFromFile := make([]byte, fi.Size())
 	_, err = f.Read(dataFromFile)
 	if err != nil {
-		log.Println("error reading", dumpFile, err)
+		log.Println("error reading", dumpFile)
 		panic(err)
 	}
 	json.Unmarshal(dataFromFile, &dumpFileJSON)

@@ -116,8 +116,10 @@ func globalMiddleware(f http.HandlerFunc) http.HandlerFunc {
 		} else {
 			f(w, r)
 		}
-		if dumpFile != "" {
-			dumpToFileRoutine()
+		if r.Method == http.MethodPut || r.Method == http.MethodDelete {
+			if dumpFile != "" {
+				dumpToFileRoutine()
+			}
 		}
 	})
 }
