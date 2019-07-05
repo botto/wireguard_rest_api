@@ -267,8 +267,8 @@ func bootstrapFromFile() {
 	dumpFileJSON := getFromFile()
 	privateKey, err := wgtypes.ParseKey(dumpFileJSON.PrivateKey)
 	if err != nil {
-		log.Println("Could not parse private key")
-		panic(err)
+		log.Println("Could not parse private key. Not loading any data from dump.")
+		return
 	}
 	peers := []wgtypes.PeerConfig{}
 	for _, dumpFilePeerJSON := range dumpFileJSON.Peers {
@@ -297,8 +297,9 @@ func bootstrapFromFile() {
 		}
 	}
 	newConfig := wgtypes.Config{
-		PrivateKey: &privateKey,
-		Peers:      peers,
+		PrivateKey:   &privateKey,
+		ReplacePeers: true,
+		Peers:        peers,
 	}
 	// apply config to interface
 	err = c.ConfigureDevice(dString, newConfig)

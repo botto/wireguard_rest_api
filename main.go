@@ -127,13 +127,13 @@ func globalMiddleware(f http.HandlerFunc) http.HandlerFunc {
 func main() {
 	dString = os.Getenv("WIREGUARD_INTERFACE")
 	dumpFile = os.Getenv("WIREGUARD_DUMP_FILE")
-	if dumpFile != "" {
-		bootstrapFromFile()
-	}
 	var wgctrlErr error
 	c, wgctrlErr = wgctrl.New()
 	if wgctrlErr != nil {
 		fmt.Println("Wireguard error: ", wgctrlErr)
+	}
+	if dumpFile != "" {
+		bootstrapFromFile()
 	}
 	http.HandleFunc("/healthz", healthz)
 	http.HandleFunc("/", globalMiddleware(rootDump))
